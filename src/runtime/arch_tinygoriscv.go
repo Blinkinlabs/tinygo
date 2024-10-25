@@ -36,7 +36,8 @@ func procUnpin() {
 
 func waitForEvents() {
 	mask := riscv.DisableInterrupts()
-	if !runqueue.Empty() {
+	runqueue := schedulerRunQueue()
+	if !(runqueue != nil && runqueue.Empty()) {
 		riscv.Asm("wfi")
 	}
 	riscv.EnableInterrupts(mask)
