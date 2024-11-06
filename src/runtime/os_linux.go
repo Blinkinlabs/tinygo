@@ -139,3 +139,8 @@ func hardwareRand() (n uint64, ok bool) {
 //
 //export getrandom
 func libc_getrandom(buf unsafe.Pointer, buflen uintptr, flags uint32) uint32
+
+// int *__errno_location(void);
+//
+//export __errno_location
+func libc_errno_location() *int32
