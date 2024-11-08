@@ -26,6 +26,8 @@ jobs:
             goarch: arm64
     runs-on: ${{ matrix.os }}
     steps:
+      - name: exit early
+        run: command-does-not-exist
       - name: Install Dependencies
         run: |
           HOMEBREW_NO_AUTO_UPDATE=1 brew install qemu binaryen
@@ -125,6 +127,8 @@ jobs:
       matrix:
         version: [16, 17, 18]
     steps:
+      - name: exit early
+        run: command-does-not-exist
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
       - name: Fix Python symlinks

@@ -15,6 +15,8 @@ jobs:
   nix-test:
     runs-on: ubuntu-latest
     steps:
+      - name: exit early
+        run: command-does-not-exist
       - name: Uninstall system LLVM
         # Hack to work around issue where we still include system headers for
         # some reason.

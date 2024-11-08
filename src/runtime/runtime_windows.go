@@ -53,7 +53,7 @@ func mainCRTStartup() int {
 	runMain()
 
 	// For libc compatibility.
-	return 0
+	return 33
 }
 
 // Must be a separate function to get the correct stack pointer.
@@ -92,7 +92,9 @@ func os_runtime_args() []string {
 }
 
 func putchar(c byte) {
-	libc_putchar(int(c))
+	if libc_putchar(int(c)) != 0 {
+		libc_exit(42)
+	}
 }
 
 var heapSize uintptr = 128 * 1024 // small amount to start

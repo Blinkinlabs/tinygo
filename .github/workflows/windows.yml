@@ -30,8 +30,11 @@ jobs:
           scoop install ninja binaryen
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
+        #with:
+        #  submodules: true
+      - name: submodules
+        shell: bash
+        run: git submodule update --init lib/mingw-w64
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -85,6 +88,11 @@ jobs:
         with:
           key: ${{ steps.cache-llvm-build.outputs.cache-primary-key }}
           path: llvm-build
+      - name: Test TinyGo
+        shell: bash
+        run: make test GOTESTFLAGS="-short -run=TestBuild"
+      - name: exit
+        run: command-does-not-exist
       - name: Cache wasi-libc sysroot
         uses: actions/cache@v4
         id: cache-wasi-libc
@@ -99,9 +107,6 @@ jobs:
           scoop install wasmtime@14.0.4
       - name: make gen-device
         run: make -j3 gen-device
-      - name: Test TinyGo
-        shell: bash
-        run: make test GOTESTFLAGS="-short"
       - name: Build TinyGo release tarball
         shell: bash
         run: make build/release -j4

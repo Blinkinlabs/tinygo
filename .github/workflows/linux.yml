@@ -20,6 +20,8 @@ jobs:
     container:
       image: golang:1.23-alpine
     steps:
+      - name: exit early
+        run: command-does-not-exist
       - name: Install apk dependencies
         # tar: needed for actions/cache@v4
         # git+openssh: needed for checkout (I think?)
@@ -166,6 +168,8 @@ jobs:
     # potential bugs.
     runs-on: ubuntu-latest
     steps:
+      - name: exit early
+        run: command-does-not-exist
       - name: Checkout
         uses: actions/checkout@v4
         with:
