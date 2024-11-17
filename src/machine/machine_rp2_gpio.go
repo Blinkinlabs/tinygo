@@ -126,7 +126,7 @@ func (p Pin) setSchmitt(trigger bool) {
 func (p Pin) setFunc(fn pinFunc) {
 	// Set input enable, Clear output disable
 	p.padCtrl().ReplaceBits(rp.PADS_BANK0_GPIO0_IE,
-		rp.PADS_BANK0_GPIO0_IE_Msk|rp.PADS_BANK0_GPIO0_OD_Msk, 0)
+		rp.PADS_BANK0_GPIO0_IE_Msk|rp.PADS_BANK0_GPIO0_OD_Msk|rp.PADS_BANK0_GPIO0_ISO_Msk, 0)
 
 	// Zero all fields apart from fsel; we want this IO to do what the peripheral tells it.
 	// This doesn't affect e.g. pullup/pulldown, as these are in pad controls.
@@ -136,7 +136,9 @@ func (p Pin) setFunc(fn pinFunc) {
 // init initializes the gpio pin
 func (p Pin) init() {
 	mask := uint32(1) << p
+
 	rp.SIO.GPIO_OE_CLR.Set(mask)
+
 	p.clr()
 }
 

@@ -3,8 +3,7 @@
         "rp2350"
     ],
     "build-tags": ["pico2"],
-    "linkerscript": "targets/pico2.ld",
+    "linkerscript": "targets/rp2350.ld",
     "extra-files": [
-        "targets/pico_boot_stage2.S"
     ]
 }

@@ -9,6 +9,7 @@ SECTIONS
     .text :
     {
         KEEP(*(.isr_vector))
+        KEEP(*(.embedded_block))
         *(.text)
         *(.text.*)
         *(.rodata)

@@ -7,6 +7,8 @@ import (
 	"unsafe"
 )
 
+var DefaultUART = UART0
+
 const (
 	LED             = GPIO25
 	_NUMBANK0_GPIOS = 48

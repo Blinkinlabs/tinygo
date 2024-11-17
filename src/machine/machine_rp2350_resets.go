@@ -25,20 +25,20 @@ var resets = (*resetsType)(unsafe.Pointer(rp.RESETS))
 // resetBlock resets hardware blocks specified
 // by the bit pattern in bits.
 func resetBlock(bits uint32) {
-	resets.frceOff.Set(bits)
+//	resets.frceOff.Set(bits)
 }
 
 // unresetBlock brings hardware blocks specified by the
 // bit pattern in bits out of reset.
 func unresetBlock(bits uint32) {
-	resets.frceOn.Set(bits)
+//	resets.frceOn.Set(bits)
 }
 
 // unresetBlockWait brings specified hardware blocks
 // specified by the bit pattern in bits
 // out of reset and wait for completion.
 func unresetBlockWait(bits uint32) {
-	unresetBlock(bits)
-	for !resets.resetDone.HasBits(bits) {
-	}
+//	unresetBlock(bits)
+//	for !resets.resetDone.HasBits(bits) {
+//	}
 }
