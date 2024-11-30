@@ -16,6 +16,13 @@ const (
 	xoscFreq        = 12 // Pico 2 Crystal oscillator Abracon ABM8-272-T3 frequency in MHz
 	rp2350ExtraReg  = 1
 	notimpl         = "rp2350: not implemented"
+	initDontReset   =
+		rp.RESETS_RESET_USBCTRL |
+		rp.RESETS_RESET_SYSCFG |
+		rp.RESETS_RESET_PLL_USB |
+		rp.RESETS_RESET_PLL_SYS |
+		rp.RESETS_RESET_PADS_QSPI |
+		rp.RESETS_RESET_IO_QSPI
 	initUnreset     = rp.RESETS_RESET_ADC |
 		rp.RESETS_RESET_SPI0 |
 		rp.RESETS_RESET_SPI1 |

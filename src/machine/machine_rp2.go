@@ -45,12 +45,7 @@ func machineInit() {
 	// except for QSPI pads and the XIP IO bank, as this is fatal if running from flash
 	// and the PLLs, as this is fatal if clock muxing has not been reset on this boot
 	// and USB, syscfg, as this disturbs USB-to-SWD on core 1
-	bits := ^uint32(rp.RESETS_RESET_IO_QSPI |
-		rp.RESETS_RESET_PADS_QSPI |
-		rp.RESETS_RESET_PLL_USB |
-		rp.RESETS_RESET_USBCTRL |
-		rp.RESETS_RESET_SYSCFG |
-		rp.RESETS_RESET_PLL_SYS)
+	bits := ^uint32(initDontReset)
 	resetBlock(bits)
 
 	// Remove reset from peripherals which are clocked only by clkSys and
@@ -58,7 +53,7 @@ func machineInit() {
 	bits = ^uint32(initUnreset)
 	unresetBlockWait(bits)
 
-//	clocks.init()
+	//clocks.init()
 
 	// Peripheral clocks should now all be running
 	unresetBlockWait(RESETS_RESET_Msk)
