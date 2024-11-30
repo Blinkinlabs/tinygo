@@ -4,7 +4,6 @@ package machine
 
 import (
 	"device/rp"
-	"runtime/volatile"
 	"unsafe"
 )
 
@@ -13,24 +12,18 @@ import (
 // TODO: This field is not available in the device file.
 const RESETS_RESET_Msk = 0x1fffffff
 
-type resetsType struct {
-	reset     volatile.Register32
-	wdSel     volatile.Register32
-	resetDone volatile.Register32
-}
-
-var resets = (*resetsType)(unsafe.Pointer(rp.RESETS))
+var resets = (*rp.RESETS_Type)(unsafe.Pointer(rp.RESETS))
 
 // resetBlock resets hardware blocks specified
 // by the bit pattern in bits.
 func resetBlock(bits uint32) {
-	resets.reset.SetBits(bits)
+	resets.RESET.SetBits(bits)
 }
 
 // unresetBlock brings hardware blocks specified by the
 // bit pattern in bits out of reset.
 func unresetBlock(bits uint32) {
-	resets.reset.ClearBits(bits)
+	resets.RESET.ClearBits(bits)
 }
 
 // unresetBlockWait brings specified hardware blocks
@@ -38,6 +31,6 @@ func unresetBlock(bits uint32) {
 // out of reset and wait for completion.
 func unresetBlockWait(bits uint32) {
 	unresetBlock(bits)
-	for !resets.resetDone.HasBits(bits) {
+	for !resets.RESET_DONE.HasBits(bits) {
 	}
 }
