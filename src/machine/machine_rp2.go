@@ -57,6 +57,12 @@ func machineInit() {
 
 	// Peripheral clocks should now all be running
 	unresetBlockWait(RESETS_RESET_Msk)
+
+    // RP2350 only
+    // Configure tick generator source for TIMER0
+    rp.TICKS.SetTIMER0_CTRL_ENABLE(0)
+    rp.TICKS.SetTIMER0_CYCLES(12)
+    rp.TICKS.SetTIMER0_CTRL_ENABLE(1)
 }
 
 //go:linkname ticks runtime.machineTicks
