@@ -62,7 +62,7 @@ const (
 	// Connect the high-speed transmit peripheral (HSTX) to GPIO.
 	fnHSTX       pinFunc = 0
 	fnSPI        pinFunc = 1 // Connect one of the internal PL022 SPI peripherals to GPIO
-	fnUARTctsrts pinFunc = 2
+	fnUART       pinFunc = 2
 	fnI2C        pinFunc = 3
 	// Connect a PWM slice to GPIO. There are eight PWM slices,
 	// each with two outputchannels (A/B). The B pin can also be used as an input,
@@ -84,7 +84,7 @@ const (
 	fnQMI pinFunc = 9
 	// USB power control signals to/from the internal USB controller.
 	fnUSB  pinFunc = 10
-	fnUART pinFunc = 11
+	fnUARTAlt pinFunc = 11
 	fnNULL pinFunc = 0x1f
 )
 
