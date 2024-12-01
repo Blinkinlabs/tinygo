@@ -22,6 +22,22 @@ func cpuPeriod() uint32 {
 // clockIndex identifies a hardware clock
 type clockIndex uint8
 
+// RP2040
+//const (
+//	clkGPOUT0 clockIndex = iota // GPIO Muxing 0
+//	clkGPOUT1                   // GPIO Muxing 1
+//	clkGPOUT2                   // GPIO Muxing 2
+//	clkGPOUT3                   // GPIO Muxing 3
+//	clkRef                      // Watchdog and timers reference clock
+//	clkSys                      // Processors, bus fabric, memory, memory mapped registers
+//	clkPeri                     // Peripheral clock for UART and SPI
+//	clkUSB                      // USB clock
+//	clkADC                      // ADC clock
+//	clkRTC                      // Real time clock
+//	numClocks
+//)
+
+// RP2350
 const (
 	clkGPOUT0 clockIndex = iota // GPIO Muxing 0
 	clkGPOUT1                   // GPIO Muxing 1
@@ -30,9 +46,9 @@ const (
 	clkRef                      // Watchdog and timers reference clock
 	clkSys                      // Processors, bus fabric, memory, memory mapped registers
 	clkPeri                     // Peripheral clock for UART and SPI
+	clkHSTX                     // High speed interface
 	clkUSB                      // USB clock
 	clkADC                      // ADC clock
-	clkRTC                      // Real time clock
 	numClocks
 )
 
@@ -53,8 +69,32 @@ type fc struct {
 	result   volatile.Register32
 }
 
+// RP2040
+//type clocksType struct {
+//	clk   [numClocks]clockType
+//	resus struct {
+//		ctrl   volatile.Register32
+//		status volatile.Register32
+//	}
+//	fc0      fc
+//	wakeEN0  volatile.Register32
+//	wakeEN1  volatile.Register32
+//	sleepEN0 volatile.Register32
+//	sleepEN1 volatile.Register32
+//	enabled0 volatile.Register32
+//	enabled1 volatile.Register32
+//	intR     volatile.Register32
+//	intE     volatile.Register32
+//	intF     volatile.Register32
+//	intS     volatile.Register32
+//}
+
+// RP2350
 type clocksType struct {
 	clk   [numClocks]clockType
+	dftclk_xosc_ctrl	volatile.Register32
+	dftclk_rosc_ctrl	volatile.Register32
+	dftclk_lposc_ctrl	volatile.Register32
 	resus struct {
 		ctrl   volatile.Register32
 		status volatile.Register32
@@ -113,8 +153,13 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 		panic("clock frequency cannot be greater than source frequency")
 	}
 
+	// RP2040
 	// Div register is 24.8 int.frac divider so multiply by 2^8 (left shift by 8)
-	div := uint32((uint64(srcFreq) << 8) / uint64(freq))
+	//div := uint32((uint64(srcFreq) << 8) / uint64(freq))
+
+	// RP2350
+	// Div register is 4.16 int.frac divider so multiply by 2^16 (left shift by 16)
+	div := uint32((uint64(srcFreq) << 16) / uint64(freq))
 
 	// If increasing divisor, set divisor before source. Otherwise set source
 	// before divisor. This avoids a momentary overspeed when e.g. switching
@@ -128,7 +173,7 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 	// Assume (!!!) glitchless source 0 is no faster than the aux source.
 	if clk.hasGlitchlessMux() && src == rp.CLOCKS_CLK_SYS_CTRL_SRC_CLKSRC_CLK_SYS_AUX {
 		clk.ctrl.ClearBits(rp.CLOCKS_CLK_REF_CTRL_SRC_Msk)
-		for !clk.selected.HasBits(1) {
+		for !clk.selected.HasBits(0x1) {
 		}
 	} else
 	// If no glitchless mux, cleanly stop the clock to avoid glitches
@@ -160,7 +205,7 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 	if clk.hasGlitchlessMux() {
 		clk.ctrl.ReplaceBits(src<<rp.CLOCKS_CLK_REF_CTRL_SRC_Pos,
 			rp.CLOCKS_CLK_REF_CTRL_SRC_Msk, 0)
-		for !clk.selected.HasBits(1 << src) {
+		for !clk.selected.HasBits(0x1 << src) {
 		}
 	}
 
@@ -181,11 +226,11 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 //
 // Must be called before any other clock function.
 func (clks *clocksType) init() {
-	// Start the watchdog tick
-	Watchdog.startTick(xoscFreq)
-
+//	// Start the watchdog tick
+//	Watchdog.startTick(xoscFreq)
+//
 	// Disable resus that may be enabled from previous software
-	clks.resus.ctrl.Set(0)
+	rp.CLOCKS.SetCLK_SYS_RESUS_CTRL_CLEAR(0)
 
 	// Enable the xosc
 	xosc.init()

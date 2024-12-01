@@ -53,7 +53,7 @@ func machineInit() {
 	bits = ^uint32(initUnreset)
 	unresetBlockWait(bits)
 
-	//clocks.init()
+	clocks.init()
 
 	// Peripheral clocks should now all be running
 	unresetBlockWait(RESETS_RESET_Msk)

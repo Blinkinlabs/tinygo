@@ -8,11 +8,24 @@ import (
 	"unsafe"
 )
 
+// RP2040
+//type pll struct {
+//	cs       volatile.Register32
+//	pwr      volatile.Register32
+//	fbDivInt volatile.Register32
+//	prim     volatile.Register32
+//}
+
+// RP2350
 type pll struct {
 	cs       volatile.Register32
 	pwr      volatile.Register32
 	fbDivInt volatile.Register32
 	prim     volatile.Register32
+	intr     volatile.Register32
+	inte     volatile.Register32
+	intf     volatile.Register32
+	ints     volatile.Register32
 }
 
 var (
