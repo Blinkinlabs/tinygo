@@ -22,35 +22,6 @@ func cpuPeriod() uint32 {
 // clockIndex identifies a hardware clock
 type clockIndex uint8
 
-// RP2040
-//const (
-//	clkGPOUT0 clockIndex = iota // GPIO Muxing 0
-//	clkGPOUT1                   // GPIO Muxing 1
-//	clkGPOUT2                   // GPIO Muxing 2
-//	clkGPOUT3                   // GPIO Muxing 3
-//	clkRef                      // Watchdog and timers reference clock
-//	clkSys                      // Processors, bus fabric, memory, memory mapped registers
-//	clkPeri                     // Peripheral clock for UART and SPI
-//	clkUSB                      // USB clock
-//	clkADC                      // ADC clock
-//	clkRTC                      // Real time clock
-//	numClocks
-//)
-
-// RP2350
-const (
-	clkGPOUT0 clockIndex = iota // GPIO Muxing 0
-	clkGPOUT1                   // GPIO Muxing 1
-	clkGPOUT2                   // GPIO Muxing 2
-	clkGPOUT3                   // GPIO Muxing 3
-	clkRef                      // Watchdog and timers reference clock
-	clkSys                      // Processors, bus fabric, memory, memory mapped registers
-	clkPeri                     // Peripheral clock for UART and SPI
-	clkHSTX                     // High speed interface
-	clkUSB                      // USB clock
-	clkADC                      // ADC clock
-	numClocks
-)
 
 type clockType struct {
 	ctrl     volatile.Register32
@@ -69,52 +40,13 @@ type fc struct {
 	result   volatile.Register32
 }
 
-// RP2040
-//type clocksType struct {
-//	clk   [numClocks]clockType
-//	resus struct {
-//		ctrl   volatile.Register32
-//		status volatile.Register32
-//	}
-//	fc0      fc
-//	wakeEN0  volatile.Register32
-//	wakeEN1  volatile.Register32
-//	sleepEN0 volatile.Register32
-//	sleepEN1 volatile.Register32
-//	enabled0 volatile.Register32
-//	enabled1 volatile.Register32
-//	intR     volatile.Register32
-//	intE     volatile.Register32
-//	intF     volatile.Register32
-//	intS     volatile.Register32
-//}
-
-// RP2350
 type clocksType struct {
-	clk   [numClocks]clockType
-	dftclk_xosc_ctrl	volatile.Register32
-	dftclk_rosc_ctrl	volatile.Register32
-	dftclk_lposc_ctrl	volatile.Register32
-	resus struct {
-		ctrl   volatile.Register32
-		status volatile.Register32
-	}
-	fc0      fc
-	wakeEN0  volatile.Register32
-	wakeEN1  volatile.Register32
-	sleepEN0 volatile.Register32
-	sleepEN1 volatile.Register32
-	enabled0 volatile.Register32
-	enabled1 volatile.Register32
-	intR     volatile.Register32
-	intE     volatile.Register32
-	intF     volatile.Register32
-	intS     volatile.Register32
+	clk   [NumClocks]clockType
 }
 
 var clocks = (*clocksType)(unsafe.Pointer(rp.CLOCKS))
 
-var configuredFreq [numClocks]uint32
+var configuredFreq [NumClocks]uint32
 
 type clock struct {
 	*clockType
@@ -141,7 +73,7 @@ func (clks *clocksType) clock(cix clockIndex) clock {
 //
 // Not all clocks have both types of mux.
 func (clk *clock) hasGlitchlessMux() bool {
-	return clk.cix == clkSys || clk.cix == clkRef
+	return clk.cix == ClkSys || clk.cix == ClkRef
 }
 
 // configure configures the clock by selecting the main clock source src
@@ -153,13 +85,7 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 		panic("clock frequency cannot be greater than source frequency")
 	}
 
-	// RP2040
-	// Div register is 24.8 int.frac divider so multiply by 2^8 (left shift by 8)
-	//div := uint32((uint64(srcFreq) << 8) / uint64(freq))
-
-	// RP2350
-	// Div register is 4.16 int.frac divider so multiply by 2^16 (left shift by 16)
-	div := uint32((uint64(srcFreq) << 16) / uint64(freq))
+    div := CalcClockDiv(srcFreq, freq)
 
 	// If increasing divisor, set divisor before source. Otherwise set source
 	// before divisor. This avoids a momentary overspeed when e.g. switching
@@ -178,16 +104,16 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 	} else
 	// If no glitchless mux, cleanly stop the clock to avoid glitches
 	// propagating when changing aux mux. Note it would be a really bad idea
-	// to do this on one of the glitchless clocks (clkSys, clkRef).
+	// to do this on one of the glitchless clocks (ClkSys, ClkRef).
 	{
-		// Disable clock. On clkRef and clkSys this does nothing,
+		// Disable clock. On ClkRef and ClkSys this does nothing,
 		// all other clocks have the ENABLE bit in the same position.
 		clk.ctrl.ClearBits(rp.CLOCKS_CLK_GPOUT0_CTRL_ENABLE_Msk)
 		if configuredFreq[clk.cix] > 0 {
 			// Delay for 3 cycles of the target clock, for ENABLE propagation.
 			// Note XOSC_COUNT is not helpful here because XOSC is not
 			// necessarily running, nor is timer... so, 3 cycles per loop:
-			delayCyc := configuredFreq[clkSys]/configuredFreq[clk.cix] + 1
+			delayCyc := configuredFreq[ClkSys]/configuredFreq[clk.cix] + 1
 			for delayCyc != 0 {
 				// This could be done more efficiently but TinyGo inline
 				// assembly is not yet capable enough to express that. In the
@@ -209,7 +135,7 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 		}
 	}
 
-	// Enable clock. On clkRef and clkSys this does nothing,
+	// Enable clock. On ClkRef and ClkSys this does nothing,
 	// all other clocks have the ENABLE bit in the same position.
 	clk.ctrl.SetBits(rp.CLOCKS_CLK_GPOUT0_CTRL_ENABLE)
 
@@ -236,12 +162,12 @@ func (clks *clocksType) init() {
 	xosc.init()
 
 	// Before we touch PLLs, switch sys and ref cleanly away from their aux sources.
-	clks.clk[clkSys].ctrl.ClearBits(rp.CLOCKS_CLK_SYS_CTRL_SRC_Msk)
-	for !clks.clk[clkSys].selected.HasBits(0x1) {
+	clks.clk[ClkSys].ctrl.ClearBits(rp.CLOCKS_CLK_SYS_CTRL_SRC_Msk)
+	for !clks.clk[ClkSys].selected.HasBits(0x1) {
 	}
 
-	clks.clk[clkRef].ctrl.ClearBits(rp.CLOCKS_CLK_REF_CTRL_SRC_Msk)
-	for !clks.clk[clkRef].selected.HasBits(0x1) {
+	clks.clk[ClkRef].ctrl.ClearBits(rp.CLOCKS_CLK_REF_CTRL_SRC_Msk)
+	for !clks.clk[ClkRef].selected.HasBits(0x1) {
 	}
 
 	// Configure PLLs
@@ -252,29 +178,29 @@ func (clks *clocksType) init() {
 	pllUSB.init(1, 480*MHz, 5, 2)
 
 	// Configure clocks
-	// clkRef = xosc (12MHz) / 1 = 12MHz
-	clkref := clks.clock(clkRef)
+	// ClkRef = xosc (12MHz) / 1 = 12MHz
+	clkref := clks.clock(ClkRef)
 	clkref.configure(rp.CLOCKS_CLK_REF_CTRL_SRC_XOSC_CLKSRC,
 		0, // No aux mux
 		12*MHz,
 		12*MHz)
 
-	// clkSys = pllSys (125MHz) / 1 = 125MHz
-	clksys := clks.clock(clkSys)
+	// ClkSys = pllSys (125MHz) / 1 = 125MHz
+	clksys := clks.clock(ClkSys)
 	clksys.configure(rp.CLOCKS_CLK_SYS_CTRL_SRC_CLKSRC_CLK_SYS_AUX,
 		rp.CLOCKS_CLK_SYS_CTRL_AUXSRC_CLKSRC_PLL_SYS,
 		125*MHz,
 		125*MHz)
 
-	// clkUSB = pllUSB (48MHz) / 1 = 48MHz
-	clkusb := clks.clock(clkUSB)
+	// ClkUSB = pllUSB (48MHz) / 1 = 48MHz
+	clkusb := clks.clock(ClkUSB)
 	clkusb.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_USB_CTRL_AUXSRC_CLKSRC_PLL_USB,
 		48*MHz,
 		48*MHz)
 
-	// clkADC = pllUSB (48MHZ) / 1 = 48MHz
-	clkadc := clks.clock(clkADC)
+	// ClkADC = pllUSB (48MHZ) / 1 = 48MHz
+	clkadc := clks.clock(ClkADC)
 	clkadc.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_ADC_CTRL_AUXSRC_CLKSRC_PLL_USB,
 		48*MHz,
@@ -282,10 +208,10 @@ func (clks *clocksType) init() {
 
 	clks.initRTC()
 
-	// clkPeri = clkSys. Used as reference clock for Peripherals.
+	// ClkPeri = ClkSys. Used as reference clock for Peripherals.
 	// No dividers so just select and enable.
-	// Normally choose clkSys or clkUSB.
-	clkperi := clks.clock(clkPeri)
+	// Normally choose ClkSys or ClkUSB.
+	clkperi := clks.clock(ClkPeri)
 	clkperi.configure(0,
 		rp.CLOCKS_CLK_PERI_CTRL_AUXSRC_CLK_SYS,
 		125*MHz,

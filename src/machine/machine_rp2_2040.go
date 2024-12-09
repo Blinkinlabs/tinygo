@@ -40,6 +40,28 @@ const (
 	PinPIO1
 )
 
+
+const (
+	ClkGPOUT0 clockIndex = iota // GPIO Muxing 0
+	ClkGPOUT1                   // GPIO Muxing 1
+	ClkGPOUT2                   // GPIO Muxing 2
+	ClkGPOUT3                   // GPIO Muxing 3
+	ClkRef                      // Watchdog and timers reference clock
+	ClkSys                      // Processors, bus fabric, memory, memory mapped registers
+	ClkPeri                     // Peripheral clock for UART and SPI
+	ClkUSB                      // USB clock
+	ClkADC                      // ADC clock
+	ClkRTC                      // Real time clock
+	NumClocks
+)
+
+
+func CalcClockDiv(srcFreq, freq uint32) uint32 {
+	// Div register is 24.8 int.frac divider so multiply by 2^8 (left shift by 8)
+    return uint32((uint64(srcFreq) << 8) / uint64(freq))
+}
+
+
 // GPIO function selectors
 const (
 	fnJTAG pinFunc = 0
@@ -137,8 +159,8 @@ func irqSetMask(mask uint32, enabled bool) {
 }
 
 func (clks *clocksType) initRTC() {
-	// clkRTC = pllUSB (48MHz) / 1024 = 46875Hz
-	clkrtc := clks.clock(clkRTC)
+	// ClkRTC = pllUSB (48MHz) / 1024 = 46875Hz
+	clkrtc := clks.clock(ClkRTC)
 	clkrtc.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_RTC_CTRL_AUXSRC_CLKSRC_PLL_USB,
 		48*MHz,

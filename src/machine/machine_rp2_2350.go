@@ -43,6 +43,25 @@ const (
 	PinPIO2
 )
 
+const (
+	ClkGPOUT0 clockIndex = iota // GPIO Muxing 0
+	ClkGPOUT1                   // GPIO Muxing 1
+	ClkGPOUT2                   // GPIO Muxing 2
+	ClkGPOUT3                   // GPIO Muxing 3
+	ClkRef                      // Watchdog and timers reference clock
+	ClkSys                      // Processors, bus fabric, memory, memory mapped registers
+	ClkPeri                     // Peripheral clock for UART and SPI
+	ClkHSTX                     // High speed interface
+	ClkUSB                      // USB clock
+	ClkADC                      // ADC clock
+	NumClocks
+)
+
+func CalcClockDiv(srcFreq, freq uint32) uint32 {
+	// Div register is 4.16 int.frac divider so multiply by 2^16 (left shift by 16)
+	return uint32((uint64(srcFreq) << 16) / uint64(freq))
+}
+
 // GPIO function selectors
 const (
 	// Connect the high-speed transmit peripheral (HSTX) to GPIO.
