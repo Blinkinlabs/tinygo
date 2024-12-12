@@ -216,4 +216,6 @@ func (clks *clocksType) init() {
 		rp.CLOCKS_CLK_PERI_CTRL_AUXSRC_CLK_SYS,
 		125*MHz,
 		125*MHz)
+
+	clks.initTicks()
 }
