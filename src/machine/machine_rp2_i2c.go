@@ -162,7 +162,7 @@ func (i2c *I2C) SetBaudRate(br uint32) error {
 	}
 
 	// I2C is synchronous design that runs from clk_sys
-	freqin := CPUFrequency()
+	freqin := pllSysFreq
 
 	// TODO there are some subtleties to I2C timing which we are completely ignoring here
 	period := (freqin + br/2) / br

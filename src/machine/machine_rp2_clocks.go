@@ -10,13 +10,13 @@ import (
 )
 
 func CPUFrequency() uint32 {
-	return 125 * MHz
+	return pllSysFreq
 }
 
 // Returns the period of a clock cycle for the raspberry pi pico in nanoseconds.
 // Used in PWM API.
 func cpuPeriod() uint32 {
-	return 1e9 / CPUFrequency()
+	return uint32(1e9) / pllSysFreq // TODO: Discards remainder
 }
 
 // clockIndex identifies a hardware clock
@@ -168,9 +168,9 @@ func (clks *clocksType) init() {
 	// Configure PLLs
 	//                   REF     FBDIV VCO            POSTDIV
 	// pllSys: 12 / 1 = 12MHz * 125 = 1500MHZ / 6 / 2 = 125MHz
+	pllSys.init(1, pllSysVcoFreq, pllSysPostDiv1, pllSysPostDiv2)
 	// pllUSB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
-	pllSys.init(1, 1500*MHz, 6, 2)
-	pllUSB.init(1, 480*MHz, 5, 2)
+	pllUSB.init(1, pllUSBVcoFreq, pllUSBPostDiv1, pllUSBPostDiv2)
 
 	// Configure clocks
 	// clkRef = xosc (12MHz) / 1 = 12MHz
@@ -180,26 +180,26 @@ func (clks *clocksType) init() {
 		12*MHz,
 		12*MHz)
 
-	// clkSys = pllSys (125MHz) / 1 = 125MHz
+	// clkSys = pllSys (pllSysFreq) / 1 = pllSysFreq
 	csys := clks.clock(clkSys)
 	csys.configure(rp.CLOCKS_CLK_SYS_CTRL_SRC_CLKSRC_CLK_SYS_AUX,
 		rp.CLOCKS_CLK_SYS_CTRL_AUXSRC_CLKSRC_PLL_SYS,
-		125*MHz,
-		125*MHz)
+		pllSysFreq,
+		pllSysFreq)
 
-	// clkUSB = pllUSB (48MHz) / 1 = 48MHz
+	// clkUSB = pllUSB (pllUSBFreq) / 1 = 48MHz
 	cusb := clks.clock(clkUSB)
 	cusb.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_USB_CTRL_AUXSRC_CLKSRC_PLL_USB,
-		48*MHz,
-		48*MHz)
+		pllUSBFreq,
+		pllUSBFreq)
 
-	// clkADC = pllUSB (48MHZ) / 1 = 48MHz
+	// clkADC = pllUSB (pllUSBFreq) / 1 = 48MHz
 	cadc := clks.clock(clkADC)
 	cadc.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_ADC_CTRL_AUXSRC_CLKSRC_PLL_USB,
-		48*MHz,
-		48*MHz)
+		pllUSBFreq,
+		pllUSBFreq)
 
 	clks.initRTC()
 
@@ -209,8 +209,8 @@ func (clks *clocksType) init() {
 	cperi := clks.clock(clkPeri)
 	cperi.configure(0,
 		rp.CLOCKS_CLK_PERI_CTRL_AUXSRC_CLK_SYS,
-		125*MHz,
-		125*MHz)
+		pllSysFreq,
+		pllSysFreq)
 
 	clks.initTicks()
 }

@@ -113,6 +113,19 @@ const (
 	fnXIP pinFunc = 0
 )
 
+// System clock configuration
+const (
+	pllSysFreq uint32 = 125*MHz
+	pllSysVcoFreq = 1500*MHz
+	pllSysPostDiv1 = 6
+	pllSysPostDiv2 = 2
+
+	pllUSBFreq uint32 = 48*MHz
+	pllUSBVcoFreq = 480*MHz
+	pllUSBPostDiv1 = 5
+	pllUSBPostDiv2 = 2
+)
+
 // Configure configures the gpio pin as per mode.
 func (p Pin) Configure(config PinConfig) {
 	if p == NoPin {
@@ -184,7 +197,7 @@ func (clks *clocksType) initRTC() {
 	crtc := clks.clock(clkRTC)
 	crtc.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_RTC_CTRL_AUXSRC_CLKSRC_PLL_USB,
-		48*MHz,
+		pllUSBFreq,
 		46875)
 }
 

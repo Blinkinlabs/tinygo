@@ -104,7 +104,7 @@ func (spi SPI) Transfer(w byte) (byte, error) {
 }
 
 func (spi SPI) SetBaudRate(br uint32) error {
-	const freqin uint32 = 125 * MHz
+	const freqin uint32 = pllSysFreq
 	const maxBaud uint32 = 66.5 * MHz // max output frequency is 66.5MHz on rp2040. see Note page 527.
 	// Find smallest prescale value which puts output frequency in range of
 	// post-divide. Prescale is an even number from 2 to 254 inclusive.
@@ -130,7 +130,7 @@ func (spi SPI) SetBaudRate(br uint32) error {
 }
 
 func (spi SPI) GetBaudRate() uint32 {
-	const freqin uint32 = 125 * MHz
+	const freqin uint32 = pllSysFreq
 	prescale := spi.Bus.SSPCPSR.Get()
 	postdiv := ((spi.Bus.SSPCR0.Get() & rp.SPI0_SSPCR0_SCR_Msk) >> rp.SPI0_SSPCR0_SCR_Pos) + 1
 	return freqin / (prescale * postdiv)
