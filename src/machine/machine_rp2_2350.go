@@ -123,15 +123,15 @@ const (
 // System clock configuration
 // Note that VcoFreq, PostDiv1, and PostDiv2 must be manually calculated to achive desired output frequency.
 const (
-	pllSysFreq uint32 = 150*MHz
-	pllSysVcoFreq = 1500*MHz
-	pllSysPostDiv1 = 5
-	pllSysPostDiv2 = 2
+	pllSysFreq     uint32 = 150 * MHz
+	pllSysVcoFreq         = 1500 * MHz
+	pllSysPostDiv1        = 5
+	pllSysPostDiv2        = 2
 
-	pllUSBFreq uint32 = 48*MHz
-	pllUSBVcoFreq = 480*MHz
-	pllUSBPostDiv1 = 5
-	pllUSBPostDiv2 = 2
+	pllUSBFreq     uint32 = 48 * MHz
+	pllUSBVcoFreq         = 480 * MHz
+	pllUSBPostDiv1        = 5
+	pllUSBPostDiv2        = 2
 )
 
 // Configure configures the gpio pin as per mode.

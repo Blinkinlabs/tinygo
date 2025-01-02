@@ -115,15 +115,15 @@ const (
 
 // System clock configuration
 const (
-	pllSysFreq uint32 = 125*MHz
-	pllSysVcoFreq = 1500*MHz
-	pllSysPostDiv1 = 6
-	pllSysPostDiv2 = 2
+	pllSysFreq     uint32 = 125 * MHz
+	pllSysVcoFreq         = 1500 * MHz
+	pllSysPostDiv1        = 6
+	pllSysPostDiv2        = 2
 
-	pllUSBFreq uint32 = 48*MHz
-	pllUSBVcoFreq = 480*MHz
-	pllUSBPostDiv1 = 5
-	pllUSBPostDiv2 = 2
+	pllUSBFreq     uint32 = 48 * MHz
+	pllUSBVcoFreq         = 480 * MHz
+	pllUSBPostDiv1        = 5
+	pllUSBPostDiv2        = 2
 )
 
 // Configure configures the gpio pin as per mode.
