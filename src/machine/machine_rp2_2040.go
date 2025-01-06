@@ -201,8 +201,6 @@ func (clks *clocksType) initRTC() {
 		46875)
 }
 
-func (clks *clocksType) initTicks() {} // No ticks on RP2040
-
 // startTick starts the watchdog tick.
 // cycles needs to be a divider that when applied to the xosc input,
 // produces a 1MHz clock. So if the xosc frequency is 12MHz,
