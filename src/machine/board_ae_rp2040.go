@@ -31,10 +31,10 @@ const (
 	GP27 Pin = GPIO27
 	GP28 Pin = GPIO28
 	GP29 Pin = GPIO29
-
-	// Onboard crystal oscillator frequency, in MHz.
-	xoscFreq = 12 // MHz
 )
+
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // I2C Default pins on Raspberry Pico.
 const (

@@ -29,13 +29,13 @@ var xosc = (*xoscType)(unsafe.Pointer(rp.XOSC))
 // This function will block until the crystal oscillator has stabilised.
 func (osc *xoscType) init() {
 	// Assumes 1-15 MHz input
-	if xoscFreq > 15 {
+	if clockCfg.xoscFreq > 15 {
 		panic("xosc frequency cannot be greater than 15MHz")
 	}
 	osc.ctrl.Set(rp.XOSC_CTRL_FREQ_RANGE_1_15MHZ)
 
 	// Set xosc startup delay
-	delay := (((xoscFreq * MHz) / 1000) + 128) / 256 * XOSC_STARTUP_DELAY_MULTIPLIER
+	delay := (((clockCfg.xoscFreq * MHz) / 1000) + 128) / 256 * XOSC_STARTUP_DELAY_MULTIPLIER
 	osc.startup.Set(uint32(delay))
 
 	// Set the enable bit now that we have set freq range and startup delay

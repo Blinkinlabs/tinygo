@@ -2,8 +2,8 @@
 
 package machine
 
-// Onboard crystal oscillator frequency, in MHz.
-const xoscFreq = 12 // MHz
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // GPIO Pins
 const (

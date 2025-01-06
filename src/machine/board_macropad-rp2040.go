@@ -4,10 +4,10 @@ package machine
 
 const (
 	NeopixelCount = 12
-
-	// Onboard crystal oscillator frequency, in MHz.
-	xoscFreq = 12 // MHz
 )
+
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 const (
 	SWITCH = GPIO0

@@ -75,10 +75,8 @@ const (
 	SPI1_SDI_PIN Pin = D12
 )
 
-// Onboard crystal oscillator frequency, in MHz.
-const (
-	xoscFreq = 12 // MHz
-)
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // UART pins
 const (

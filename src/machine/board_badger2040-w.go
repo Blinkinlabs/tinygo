@@ -68,10 +68,8 @@ SPI0_CS_PIN  Pin = QSPI_CS
 */
 )
 
-// Onboard crystal oscillator frequency, in MHz.
-const (
-	xoscFreq = 12 // MHz
-)
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // USB CDC identifiers
 const (

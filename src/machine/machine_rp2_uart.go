@@ -75,7 +75,7 @@ func (uart *UART) Configure(config UARTConfig) error {
 
 // SetBaudRate sets the baudrate to be used for the UART.
 func (uart *UART) SetBaudRate(br uint32) {
-	div := 8 * pllSysFreq / br
+	div := 8 * clockCfg.pllSysFreq / br
 
 	ibrd := div >> 7
 	var fbrd uint32

@@ -4,10 +4,10 @@ package machine
 
 const (
 	LED = GPIO24
-
-	// Onboard crystal oscillator frequency, in MHz.
-	xoscFreq = 12 // MHz
 )
+
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // GPIO Pins
 const (

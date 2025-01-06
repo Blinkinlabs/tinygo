@@ -10,13 +10,13 @@ import (
 )
 
 func CPUFrequency() uint32 {
-	return pllSysFreq
+	return clockCfg.pllSysFreq
 }
 
 // Returns the period of a clock cycle for the raspberry pi pico in nanoseconds.
 // Used in PWM API.
 func cpuPeriod() uint32 {
-	return uint32(1e9) / pllSysFreq // TODO: Discards remainder
+	return uint32(1e9) / clockCfg.pllSysFreq // TODO: Discards remainder
 }
 
 // clockIndex identifies a hardware clock
@@ -143,12 +143,26 @@ func (clk *clock) configure(src, auxsrc, srcFreq, freq uint32) {
 
 }
 
+type systemClockCfg struct {
+	xoscFreq uint32
+
+	pllSysFreq     uint32
+	pllSysVcoFreq  uint32
+	pllSysPostDiv1 uint32
+	pllSysPostDiv2 uint32
+
+	pllUSBFreq     uint32
+	pllUSBVcoFreq  uint32
+	pllUSBPostDiv1 uint32
+	pllUSBPostDiv2 uint32
+}
+
 // init initializes the clock hardware.
 //
 // Must be called before any other clock function.
 func (clks *clocksType) init() {
 	// Start the watchdog tick
-	Watchdog.startTick(xoscFreq)
+	Watchdog.startTick(clockCfg.xoscFreq)
 
 	// Disable resus that may be enabled from previous software
 	rp.CLOCKS.SetCLK_SYS_RESUS_CTRL_CLEAR(0)
@@ -168,38 +182,38 @@ func (clks *clocksType) init() {
 	// Configure PLLs
 	//                   REF     FBDIV VCO            POSTDIV
 	// pllSys: 12 / 1 = 12MHz * 125 = 1500MHZ / 6 / 2 = 125MHz
-	pllSys.init(1, pllSysVcoFreq, pllSysPostDiv1, pllSysPostDiv2)
+	pllSys.init(1, clockCfg.pllSysVcoFreq, clockCfg.pllSysPostDiv1, clockCfg.pllSysPostDiv2)
 	// pllUSB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
-	pllUSB.init(1, pllUSBVcoFreq, pllUSBPostDiv1, pllUSBPostDiv2)
+	pllUSB.init(1, clockCfg.pllUSBVcoFreq, clockCfg.pllUSBPostDiv1, clockCfg.pllUSBPostDiv2)
 
 	// Configure clocks
-	// clkRef = xosc (12MHz) / 1 = 12MHz
+	// clkRef = xosc (xoscFreq) / 1 = xoscFreq
 	cref := clks.clock(clkRef)
 	cref.configure(rp.CLOCKS_CLK_REF_CTRL_SRC_XOSC_CLKSRC,
 		0, // No aux mux
-		12*MHz,
-		12*MHz)
+		clockCfg.xoscFreq,
+		clockCfg.xoscFreq)
 
 	// clkSys = pllSys (pllSysFreq) / 1 = pllSysFreq
 	csys := clks.clock(clkSys)
 	csys.configure(rp.CLOCKS_CLK_SYS_CTRL_SRC_CLKSRC_CLK_SYS_AUX,
 		rp.CLOCKS_CLK_SYS_CTRL_AUXSRC_CLKSRC_PLL_SYS,
-		pllSysFreq,
-		pllSysFreq)
+		clockCfg.pllSysFreq,
+		clockCfg.pllSysFreq)
 
 	// clkUSB = pllUSB (pllUSBFreq) / 1 = 48MHz
 	cusb := clks.clock(clkUSB)
 	cusb.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_USB_CTRL_AUXSRC_CLKSRC_PLL_USB,
-		pllUSBFreq,
-		pllUSBFreq)
+		clockCfg.pllUSBFreq,
+		clockCfg.pllUSBFreq)
 
 	// clkADC = pllUSB (pllUSBFreq) / 1 = 48MHz
 	cadc := clks.clock(clkADC)
 	cadc.configure(0, // No GLMUX
 		rp.CLOCKS_CLK_ADC_CTRL_AUXSRC_CLKSRC_PLL_USB,
-		pllUSBFreq,
-		pllUSBFreq)
+		clockCfg.pllUSBFreq,
+		clockCfg.pllUSBFreq)
 
 	clks.initRTC()
 
@@ -209,6 +223,6 @@ func (clks *clocksType) init() {
 	cperi := clks.clock(clkPeri)
 	cperi.configure(0,
 		rp.CLOCKS_CLK_PERI_CTRL_AUXSRC_CLK_SYS,
-		pllSysFreq,
-		pllSysFreq)
+		clockCfg.pllSysFreq,
+		clockCfg.pllSysFreq)
 }

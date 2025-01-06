@@ -120,19 +120,20 @@ const (
 	fnNULL    pinFunc = 0x1f
 )
 
-// System clock configuration
-// Note that VcoFreq, PostDiv1, and PostDiv2 must be manually calculated to achive desired output frequency.
-const (
-	pllSysFreq     uint32 = 150 * MHz
-	pllSysVcoFreq         = 1500 * MHz
-	pllSysPostDiv1        = 5
-	pllSysPostDiv2        = 2
+// Clock frequency and PLL configuration
+var defaultSystemClockCfg = systemClockCfg{
+	xoscFreq: 12,
 
-	pllUSBFreq     uint32 = 48 * MHz
-	pllUSBVcoFreq         = 480 * MHz
-	pllUSBPostDiv1        = 5
-	pllUSBPostDiv2        = 2
-)
+	pllSysFreq:     150 * MHz,
+	pllSysVcoFreq:  1500 * MHz,
+	pllSysPostDiv1: 5,
+	pllSysPostDiv2: 2,
+
+	pllUSBFreq:     48 * MHz,
+	pllUSBVcoFreq:  480 * MHz,
+	pllUSBPostDiv1: 5,
+	pllUSBPostDiv2: 2,
+}
 
 // Configure configures the gpio pin as per mode.
 func (p Pin) Configure(config PinConfig) {

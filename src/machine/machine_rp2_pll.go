@@ -30,7 +30,7 @@ var (
 //
 // Post Divider 2, postDiv2 with range 1-7.
 func (pll *pll) init(refdiv, vcoFreq, postDiv1, postDiv2 uint32) {
-	refFreq := xoscFreq / refdiv
+	refFreq := clockCfg.xoscFreq / refdiv
 
 	// What are we multiplying the reference clock by to get the vco freq
 	// (The regs are called div, because you divide the vco output and compare it to the refclk)

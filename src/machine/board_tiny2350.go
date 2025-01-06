@@ -27,10 +27,10 @@ const (
 	LED_GREEN Pin = GPIO19
 	LED_BLUE  Pin = GPIO20
 	LED           = LED_RED
-
-	// Onboard crystal oscillator frequency, in MHz.
-	xoscFreq = 12 // MHz
 )
+
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // I2C Default pins on Tiny2350.
 const (

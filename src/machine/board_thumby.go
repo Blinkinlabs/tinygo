@@ -49,10 +49,8 @@ const (
 	SPI1_SDI_PIN = NoPin
 )
 
-// Onboard crystal oscillator frequency, in MHz.
-const (
-	xoscFreq = 12 // MHz
-)
+// System clock configuration
+var clockCfg = defaultSystemClockCfg
 
 // USB CDC identifiers
 const (
